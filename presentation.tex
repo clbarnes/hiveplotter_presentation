@@ -1,0 +1,467 @@
+\documentclass{beamer}
+
+\mode<presentation> {
+
+\usetheme{Madrid}
+\usecolortheme{lily}
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\graphicspath{{img/}}
+\usepackage{listings}
+
+\usepackage[backend=bibtex,style=mla]{biblatex}
+\addbibresource{bibl.bib}
+
+\usepackage{color}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegrey}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+
+\lstdefinestyle{pythonstyle}{
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegrey},
+    stringstyle=\color{codepurple},
+    basicstyle=footnotestyle,
+    breakatwhitespace=false
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false
+}
+
+\lstset{
+    language=Python,
+    style=pythonstyle,
+    showstringspaces=false,
+    formfeed=\newpage,
+    tabsize=4,w
+    commentstyle=\itshape,
+    basicstyle=\ttfamily,
+    morekeywords={models, lambda, forms}
+}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeameroption{hide notes}
+
+\title[hiveplotter]{hiveplotter: A Python library for creating hive plots from NetworkX graphs} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Chris L. Barnes} % Your name
+\institute[MRC-LMB] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+MRC Laboratory of Molecular Biology \\ % Your institution for the title page
+\medskip
+\textit{cbarnes@mrc-lmb.cam.ac.uk} % Your email address
+}
+\date{March 12, 2015}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\note{Welcome to lab talk etc.
+Apologies for overly formal slideshow, got carried away with LaTeX
+Library I've developed for creating hive plots, a deterministic and rational way of visualising large-scale networks}
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview}
+\tableofcontents
+\note{Motivations behind project
+Why design choices were made}
+\end{frame}
+
+\section{Motivations}
+
+\begin{frame}
+\frametitle{Motivations}
+\begin{itemize}
+\item Examining static properties of the \textit{C. elegans} connectome
+\item Comparing the structures of the gap junction and chemical synapse network, and a putative extrasynaptic monoamine network
+\item Need tool to visualise such networks in a rational fashion
+\end{itemize}
+\let\thefootnote\relax\footnotetext{Putative extrasynaptic monoamine network: Barry Bentley, unpublished}
+\note{Project with Bill Schafer + Barry Bentley (here), Petra Vertes (Brain Mapping Unit)
+Treating gap junction, synapse and monoamine networks as separate and comparing their structures
+Looking for common network motifs
+Hairballs are not very informative at this scale - need better way to visualise them
+Come onto this more later}
+\end{frame}
+
+\section{Graph visualisation}
+\subsection{Hairballs vs. hive plots}
+
+\begin{frame}
+\frametitle{Hairballs vs. hive plots}
+\begin{block}{Hive plots}
+are a rational visualisation method for drawing networks.
+\end{block}
+\begin{columns}[t]
+
+\column{.45\textwidth} 
+\textbf{Hairballs}
+\begin{itemize}
+\item[+] Easy to visually trace paths
+\item[+] Small numbers of nodes can be identified individually
+\item[--] Potentially misleading layout algorithms
+\item[--] Useless for large networks
+\item[--] Not useful for generalising inter-class edges
+\end{itemize}
+
+\column{.45\textwidth}
+\textbf{Hive plots}
+\vspace{0.5cm}
+\begin{itemize}
+\item[+] Easy to visualise large numbers of nodes and edges
+\item[+] Deterministic but flexible layout
+\item[+] Expose both trends and outlier patterns
+\item[--] Paths are less obvious
+
+\end{itemize}
+\end{columns}
+\note{Ball-and-stick useful for very small networks but less useful as they become more hairy - 'confusogram'
+Apparent structure often an emergent result of the drawing algorithm rather than real network topology
+Hive plots: better for large data sets and drawing conclusions from populations; deterministic }
+\end{frame}
+
+\begin{frame}
+\frametitle{Hairballs vs. hive plots}
+\begin{center}
+\includegraphics[scale=0.45]{hairball.png}
+\end{center}
+\note{Hairball C. elegans synaptic connectome
+(force-directed node positioning)
+Yellow = interneurones
+Magenta = motor neurones
+Cyan = sensory neurones
+
+Most interesting (hub) neurones end up in the middle of the mess}
+\end{frame}
+
+\begin{frame}
+\frametitle{Hairballs vs. hive plots}
+\begin{center}
+\includegraphics[scale=0.3]{hiveplot.pdf}
+\end{center}
+\note{3 radial primary axes, nodes split into 3 classes
+Arrayed up axes by degree
+Axes split to allow intra-class edges to be shown
+Here, random edge colouration for contrast
+
+Hub interneurones clearly visible (AVAR and AVAL at top of interneurones w/ reciprocal connections)
+Can see relatively sparse sensory-sensory and sensory-motor edges compared to connections with interneurones. NetworkX allows us to interrogate the graph
+Lonely sensory neurone is PLML
+Highly-connected sensory neurone is DVA - also an interneurone (hence the high degree), but sensory class given priority in filtering data
+Highly-connected motor neurone is HSNR, involved in egg-laying}
+\end{frame}
+
+\section{Existing libraries}
+\begin{frame}
+\frametitle{Existing libraries}
+\textbf{jhive}
+\begin{itemize}
+\item[+] Fairly simple to use
+\item[+] Some features can be accessed with GUI
+\item[--] Requires manual or programmatic creation of config file from data
+\end{itemize}
+\vspace{1cm}
+\textbf{d3.js}
+\begin{itemize}
+\item[+] Highly flexible
+\item[+] Scope for interactive plots
+\item[--] A lot of boilerplate code required - not so good for static plots
+\end{itemize}
+\note{jhive - java, uses config file, some aspects can be tweaked graphically but poor support for labelling
+
+d3 - javascript, good for embedding in a dynamic web page but less useful for publication; a lot of boilerplate and knowledge required}
+\end{frame}
+
+\begin{frame}
+\frametitle{hiveplotter}
+\begin{block}{}
+A Python library for creating hive plots from NetworkX graphs
+\end{block}
+\vspace{1cm}
+\begin{itemize}
+\item[+] Data input is a NetworkX graph (easy to generate from other formats, easy to validate)
+\item[+] Produces publication-quality vector-drawn PDFs
+\item[+] Highly customisable yet reproducible behaviour
+\item[--] Static
+\end{itemize}
+\note{Aims: use data which makes graph interrogation easy and can be imported from other formats
+- simple, self-documenting API
+direct to publication
+(but no interaction with graph)}
+\end{frame}
+
+
+\section{Why Python?} 
+
+\begin{frame}
+\frametitle{Why Python?}
+\begin{block}{}
+Python is free, open, flexible and beautiful.
+\end{block}
+\vspace{0.5cm}
+\begin{itemize}
+\item Open-source
+\item Concise
+\item Cross-platform
+\item Huge 3rd-party libraries
+\end{itemize}
+\note{Python: excellent general-purpose programming language rapidly gaining traction in scientific community
+User-friendly, tools exist for hosting code etc.
+Open source (can check algo implementations etc.) and 3rd party libraries are easy to create
+Commonly used in industry for rapid prototyping - almost pseudocode in its syntax, high productivity
+Large projects such as Janelia's Collaborative Annotation Toolkit for Massive Amounts of Image Data, reddit}
+\end{frame}
+
+\subsection{Python vs. Matlab}
+
+\begin{frame}
+\frametitle{Python vs. Matlab}
+\begin{columns}[t]
+
+\column{.45\textwidth} 
+\textbf{Python}
+\begin{itemize}
+\item[+] Free
+\item[+] General-purpose programming language
+\item[+] Libraries for matlab-style and R-style plotting
+\item[+] Generally more concise syntax
+\item[+] Excellent support for string and file mangling
+\item[+] Interfaces well with other languages
+\item[--] Smaller standard library
+\end{itemize}
+
+\column{.45\textwidth}
+\textbf{Matlab}
+\begin{itemize}
+\item[+] More concise array manipulation syntax
+\item[+] More plug-and-play
+\item[+] Simulink
+\item[--] Proprietary algorithms
+\item[--] Linear algebra package with scripting tagged on
+\item[--] Dependent on JVM
+
+\end{itemize}
+\end{columns}
+\note{Common 'competitor' is matlab
+Python conforms to other languages more (0-base indexing, OOP, better handling of user modules)
+Cython and PyPy for speed, or C and fortran
+NumPy and pandas replicate most matlab and R functionality (arrays vs. matrices)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Python vs. Matlab}
+\begin{center}
+\includegraphics[scale=0.25]{matlab_vs_python.png}
+\end{center}
+\note{Don't take my word for it: First page of google results - one in favour of matlab
+Either that, or pythonistas are just very prolific writers and/or obnoxious, spend more time on soap boxes}
+\end{frame}
+
+\section{NetworkX}
+
+\begin{frame}
+
+\frametitle{NetworkX}
+\begin{block}{}
+... a Python language software package for the creation, manipulation, and study of the structure, dynamics and functions of complex networks
+\end{block}
+
+\begin{itemize}
+\item[+] Open source
+\item[+] Very `pythonic', human-readable API
+\item[+] Implementations of many common algorithms using C libraries (fast)
+\item[+] Extremely good at reading and writing network structures of different formats
+\item[--] Some algorithms are pure python - readable, but not fast 
+\end{itemize}
+\note{Open - can check algo implementation or fork and change it yourself
+Most algorithms use a numpy/ matlab-esque adjacency matrix backend
+Can draw data from adjacency matrices, edge lists, GML, JSON etc. and write out as well
+}
+
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{NetworkX}
+
+\begin{lstlisting}
+>>> import networkx as nx
+>>> G = nx.Graph()
+>>> G.add_node('ASER')
+>>> G.add_nodes_from(list_of_nodes)
+>>> G.add_edge('ASEL', 'ASER',
+        type='Gap Junction')
+>>> G.add_edges_from(list_of_edges)
+>>> sorted(nx.degree(G).items(),
+        key=lambda x: x[1], reverse=True)
+Out: [  ('ASER', 3),
+        ('AFDR', 2),
+        ('AFDL', 2),
+        ('ASEL', 1)]
+\end{lstlisting}
+\note{Example code - very readable API
+A lot of network algos are implemented
+Useful for structuring any hierarchical data
+
+1-line recipe for finding most connected nodes
+}
+\end{frame}
+
+\section{hiveplotter}
+
+\begin{frame}[fragile]
+\frametitle{hiveplotter}
+\begin{lstlisting}
+>>> from hiveplotter import HivePlot
+>>> G = get_c_elegans_connectome()
+>>> h = HivePlot(G, node_class_attribute='type')
+>>> h.edge_colour_gradient = 'ReverseRainbow'
+>>> h.draw(show=True)
+\end{lstlisting}
+\note{Sample code
+Import as with anything else
+fictitious get method (if only it were that easy would have saved White et al quite a lot of time)
+well-defined default behaviour in config file
+defaults can be overridden as kwargs
+behaviour can also be changed after instantiation
+processing is done with 'draw' command- can then be saved as pdf or shown as bitmap}
+\end{frame}
+
+\begin{frame}
+\frametitle{hiveplotter}
+\begin{center}
+\includegraphics[scale=0.3]{generated.pdf}
+\end{center}
+\note{Same synaptic network as before. Weight of edges (contained in data) shown by colour and thickness. No intra-class by default
+Large nodes where multiple share same location
+}
+\end{frame}
+
+\begin{frame}
+\frametitle{Customisation}
+\begin{itemize}
+\item Edges can be coloured based on any attribute, using a variety of gradients (or use manually specified colours); legend can be automatically generated
+\item Edges can be made straight
+\item Nodes can be spread out along the length of the axis
+\item Nodes can be positioned based on any attribute
+\item Sizes and colours are customisable (greyscale, RGB, CMYK, or named colours)
+\end{itemize}
+\note{Customisation options - handled through kwargs, instance variable assignment, or human-readable ini file}
+\end{frame}
+
+\section{Examples}
+
+\begin{frame}
+\frametitle{Canonical example}
+\begin{center}
+\includegraphics[scale=0.3]{degree_whole.pdf}
+\end{center}
+\note{Plot of elegans connectome including synapses, gap junctions and monoamines, nodes sorted by degree
+Very strong sensory-sensory and sensory-motor monoamine links
+Hub interneurones form mainly chemical synapses with sensory neurones and gap junctions with motor neurones (although be aware of superimposition)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Hairball version}
+\begin{center}
+\includegraphics[scale=0.3]{hairball_stack.png}
+\end{center}
+\note{Best way of showing with hairball - aggregated plot is not very helpful at all, some interesting dumbbell structure in subnetworks but that's about all you can say}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further examples}
+\begin{center}
+\includegraphics[scale=0.3]{location_whole.pdf}
+\end{center}
+\note{Plot of elegans connectome including synapses, gap junctions and putative extrasynaptic monoamine connections (Barry Bentley), nodes arranged by AP location of the cell body
+High monoamine connectivity among sensory neurones, and particularly between them and motor neurones
+High degree of synaptic and gap junction connectivity within motor neurones
+(Note: in cases where there are multiple edges between the same two nodes they will cover each other)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further examples}
+\begin{center}
+\includegraphics[scale=0.3]{location_GapJunction.pdf}
+\end{center}
+\note{Plot of elegans gap junction network, nodes arranged by anterioposterior location of the cell body
+As expected, high density of nodes at anterior end and thick banding of edges between them
+Outside of the head, fairly sparse connections between sensory and motor - mostly around the vulva
+Interconnections of sensory neurones are all local (there are some remote synaptic connections)
+Interneurons from all over the body connect to motor neurones from all over the body}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further examples}
+\begin{center}
+\includegraphics[scale=0.3]{age_GapJunction.pdf}
+\end{center}
+\note{Plot of elegans gap junction network, nodes arranged by birth time
+Not many gap junctions between two late-forming sensory/ interneurones
+Surge in motor neurones around L3 stage}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further examples}
+\begin{center}
+\includegraphics[scale=0.3]{degree_Synapse_edgelength.pdf}
+\end{center}
+\note{Plot of elegans synaptic network, with nodes ordered by degree and edges coloured red-white by the distance between cell bodies of their endpoints.
+Hub interneurones form both local and long-range connections with other interneurones, but mainly long-range with motor neurones.
+Majority of sensory -> motor connections are short-range (exception is the DVA, an interneurone)}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further examples}
+\begin{center}
+\includegraphics[scale=0.3]{axes_by_segment.pdf}
+\end{center}
+\note{Plot of gap junctions and synapses, ordered by AP position.
+As expected, sparse gap junctions between head and tail
+High connectivity between head and all of midbody
+Midbody-tail connections more sparse than head-tail}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{The future}
+\begin{itemize}
+\item Feature requests are welcomed
+\item github.com/clbarnes/hiveplotter
+\item todo: Improve very large network visualisation using transparent edges
+\item todo: Make discriminating between nodes easier using force-directed layout
+\item todo: Make discriminating between edges easier by spreading them out
+\end{itemize}
+\note{Hope that it's useful to other people - feature requests are welcome
+Code available from github
+List of issues for resolution }
+\end{frame}
+
+\begin{frame}
+\frametitle{Acknowledgements}
+\begin{itemize}
+\item Bill Schafer
+\item Barry Bentley
+\item Petra Vertes
+\item Stephen Larson \footcite{beyond_the_hairball}
+\item OpenWorm
+\item biological-networks.org \footcite{varier2011}
+\end{itemize}
+\note{Bill, Barry and Petra for discussions regarding the connectome and application of hive plots
+Barry for providing extrasynaptic network
+Stephen for telling me about hive plots in the first place (citation for conference proceedings where he presented some worm hive plots), and OpenWorm for aggregating much of the data used in the figures.
+biological-networks for aggregating more data}
+\end{frame}
+
+
+\end{document} 

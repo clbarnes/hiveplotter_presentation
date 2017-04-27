@@ -1,0 +1,101 @@
+\documentclass{beamer}
+
+\mode<presentation> {
+
+\usetheme{Madrid}
+\usecolortheme{lily}
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\graphicspath{{img/}}
+
+\title[hiveplotter]{Hiveplotter: A Python library for creating hive plots from NetworkX graphs} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Chris Barnes} % Your name
+\institute[MRC-LMB] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{
+MRC Laboratory of Molecular Biology \\ % Your institution for the title page
+\medskip
+\textit{cbarnes@mrc-lmb.cam.ac.uk} % Your email address
+}
+\date{March 12, 2015} % Date, can be changed to a custom date
+
+\begin{document}
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	PRESENTATION SLIDES
+%----------------------------------------------------------------------------------------
+
+%------------------------------------------------
+\section{Why Python?} % Sections can be created in order to organize your presentation into discrete blocks, all sections and subsections are automatically printed in the table of contents as an overview of the talk
+%------------------------------------------------
+
+
+\begin{frame}
+\frametitle{Why Python?}
+\begin{block}{}
+Python is free, open, flexible and beautiful.
+\end{block}
+
+\begin{itemize}
+\item Open-source
+\item Concise
+\item Cross-platform
+\item Huge 3rd-party libraries
+\end{itemize}
+\end{frame}
+
+\subsection{Python vs. Matlab} % A subsection can be created just before a set of slides with a common theme to further break down your presentation into chunks
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Python vs. Matlab}
+\begin{columns}[t] % The "c" option specifies centered vertical alignment while the "t" option is used for top vertical alignment
+
+\column{.45\textwidth} % Left column and width
+\textbf{Python}
+\begin{itemize}
+\item[+] Free
+\item[+] General-purpose programming language
+\item[+] Libraries for matlab-style and R-style plotting
+\item[+] Generally more concise syntax
+\item[+] Excellent support for string and file mangling
+\item[+] Interfaces well with other languages
+\item[--] Smaller standard library
+\end{itemize}
+
+\column{.45\textwidth}
+\textbf{Matlab}
+\begin{itemize}
+\item[+] More concise array manipulation syntax
+\item[+] More plug-and-play
+\item[+] Simulink
+\item[--] Proprietary algorithms
+\item[--] Linear algebra package with scripting tagged on
+\item[--] Dependent on JVM
+
+\end{itemize}
+\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Python vs. Matlab}
+
+\includegraphics{img/matlab_vs_python.png}
+
+\end{frame}
+
+\end{document} 
